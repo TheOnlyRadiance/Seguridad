@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "SEGURIDAD.DATA/1.0.0": {
+        "dependencies": {
+          "SEGURIDAD.DTOS": "1.0.0"
+        },
+        "runtime": {
+          "SEGURIDAD.DATA.dll": {}
+        }
+      },
+      "SEGURIDAD.DTOS/1.0.0": {
+        "runtime": {
+          "SEGURIDAD.DTOS.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SEGURIDAD.DATA/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SEGURIDAD.DTOS/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

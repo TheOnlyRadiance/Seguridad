@@ -1,0 +1,15 @@
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\bin\Debug\net8.0\SEGURIDAD.DATA.deps.json
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\bin\Debug\net8.0\SEGURIDAD.DATA.dll
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\bin\Debug\net8.0\SEGURIDAD.DATA.pdb
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\bin\Debug\net8.0\SEGURIDAD.DTOS.dll
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\bin\Debug\net8.0\SEGURIDAD.DTOS.pdb
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.csproj.AssemblyReference.cache
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.AssemblyInfoInputs.cache
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.AssemblyInfo.cs
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.csproj.CoreCompileInputs.cache
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDA.87679636.Up2Date
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.dll
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\refint\SEGURIDAD.DATA.dll
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\SEGURIDAD.DATA.pdb
+C:\Users\rodri\OneDrive\Desktop\Proyecto Carlos\SEGURIDAD.MVC\SEGURIDAD.DATA\obj\Debug\net8.0\ref\SEGURIDAD.DATA.dll
