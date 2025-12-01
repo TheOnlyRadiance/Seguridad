@@ -1,83 +1,40 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SEGURIDAD.DATA.Interfaces;
 
 namespace SEGURIDAD.MVC.Controllers
 {
     public class CryptoController : Controller
     {
+        private readonly ICryptoService _encryption;
+
+        public CryptoController(ICryptoService encryption)
+        {
+            _encryption = encryption;
+        }
+
+        public IActionResult Cifrar(string texto)
+        {
+            var cipher = _encryption.EncryptToBase64(texto);
+            return Json(new { cifrado = cipher });
+        }
+
+        public IActionResult Descifrar(string cipher)
+        {
+            var plain = _encryption.DecryptFromBase64(cipher);
+            return Json(new { textoPlano = plain });
+        }
         // GET: CryptoController
-        public ActionResult Index()
+        public ActionResult Encriptar()
         {
             return View();
         }
 
-        // GET: CryptoController/Details/5
-        public ActionResult Details(int id)
+        public IActionResult Desencriptar()
         {
             return View();
-        }
+        } 
 
-        // GET: CryptoController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: CryptoController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: CryptoController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: CryptoController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: CryptoController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: CryptoController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        
     }
 }

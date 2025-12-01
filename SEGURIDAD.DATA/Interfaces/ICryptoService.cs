@@ -8,5 +8,7 @@ namespace SEGURIDAD.DATA.Interfaces
 {
     public interface ICryptoService
     {
+        string EncryptToBase64(string plainText);
+        string DecryptFromBase64(string cipherTextBase64);
     }
 }
