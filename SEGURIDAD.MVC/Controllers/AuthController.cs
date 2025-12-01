@@ -6,7 +6,7 @@ namespace SEGURIDAD.MVC.Controllers
     public class AuthController : Controller
     {
         // GET: AuthController
-        public ActionResult Index()
+        public ActionResult Login()
         {
             return View();
         }
@@ -23,19 +23,15 @@ namespace SEGURIDAD.MVC.Controllers
             return View();
         }
 
+
+        //Login simulado :)
         // POST: AuthController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Login(string email, string password)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+
+            return RedirectToAction("Index", "Home");
         }
 
         // GET: AuthController/Edit/5
