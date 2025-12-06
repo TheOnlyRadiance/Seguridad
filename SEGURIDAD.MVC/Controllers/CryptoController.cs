@@ -21,8 +21,22 @@ namespace SEGURIDAD.MVC.Controllers
 
         public IActionResult Descifrar(string cipher)
         {
-            var plain = _encryption.DecryptFromBase64(cipher);
-            return Json(new { textoPlano = plain });
+            try
+            {
+                var plain = _encryption.DecryptFromBase64(cipher);
+                return Json(new { textoPlano = plain });
+            }
+            catch (ArgumentException ex)
+            {
+                return Json(new { textoPlano = (string?)null, error = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new { textoPlano = (string?)null, error = "Ocurrió un error inesperado al desencriptar." });
+            }
+            
+
+
         }
         // GET: CryptoController
         public ActionResult Encriptar()

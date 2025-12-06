@@ -81,24 +81,21 @@
                 return;
             }
 
-            // Limpiar saltos de línea o espacios
             const cleanText = inputText.replace(/[\n\s]/g, '');
 
             try {
                 const response = await fetch(`/Crypto/Descifrar?cipher=${encodeURIComponent(cleanText)}`);
+                const data = await response.json();
 
-                if (!response.ok) {
-                    showError("❌ El texto no es válido o no se puede desencriptar");
+                if (data.error) {
+                    showError('❌ ' + data.error);
+                    document.getElementById('decryptResult').classList.add('d-none');
                     return;
                 }
 
-                const data = await response.json();
-
-                // Mostrar el texto desencriptado
                 document.getElementById('decryptedText').textContent = data.textoPlano;
                 document.getElementById('decryptResult').classList.remove('d-none');
                 hideError();
-
                 document.getElementById('decryptResult').scrollIntoView({ behavior: 'smooth' });
 
             } catch (error) {
@@ -126,8 +123,10 @@
         }
 
         function hideError() {
-            document.getElementById('errorMessage').classList.add('d-none');
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.add('d-none');
         }
     </script>
+
 </body>
 </html>
