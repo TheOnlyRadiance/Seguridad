@@ -32,7 +32,7 @@
     <div class="container">
         <div class="card shadow">
             <div class="card-header text-white">
-                <h3 class="text-center mb-0">🔓 DESENCRIPTAR TEXTO</h3>
+                <h3 class="text-center mb-0">DESENCRIPTAR TEXTO</h3>
             </div>
             <div class="card-body p-4">
                 <!-- Texto Encriptado -->
@@ -46,7 +46,7 @@
                 <!-- Botón Desencriptar -->
                 <div class="text-center mb-4">
                     <button type="button" class="btn btn-decrypt text-white btn-lg px-5" onclick="decryptText()">
-                        🚀 DESENCRIPTAR TEXTO
+                         DESENCRIPTAR TEXTO
                     </button>
                 </div>
 
@@ -57,14 +57,11 @@
                         <pre id="decryptedText" class="mb-2 fs-6"></pre>
                         <div class="mt-3">
                             <button type="button" class="btn btn-outline-success btn-sm" onclick="copyToClipboard('decryptedText')">
-                                📋 Copiar Texto Original
+                                 Copiar Texto Original
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAll()">
-                                🗑️ Limpiar Todo
+                                 Limpiar Todo
                             </button>
-                            <a href="/Encryption/Index" class="btn btn-outline-primary btn-sm">
-                                🔒 Ir a Encriptar
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -76,7 +73,7 @@
     </div>
 
     <script>
-        function decryptText() {
+        async function decryptText() {
             const inputText = document.getElementById('inputText').value.trim();
 
             if (!inputText) {
@@ -84,27 +81,34 @@
                 return;
             }
 
+            // Limpiar saltos de línea o espacios
+            const cleanText = inputText.replace(/[\n\s]/g, '');
+
             try {
-                // Limpiar formato (quitar saltos de línea y espacios)
-                const cleanText = inputText.replace(/[\n\s]/g, '');
+                const response = await fetch(`/Crypto/Descifrar?cipher=${encodeURIComponent(cleanText)}`);
 
-                // Simulación de desencriptación (en producción usar backend)
-                const decrypted = decodeURIComponent(escape(atob(cleanText)));
+                if (!response.ok) {
+                    showError("❌ El texto no es válido o no se puede desencriptar");
+                    return;
+                }
 
-                document.getElementById('decryptedText').textContent = decrypted;
+                const data = await response.json();
+
+                // Mostrar el texto desencriptado
+                document.getElementById('decryptedText').textContent = data.textoPlano;
                 document.getElementById('decryptResult').classList.remove('d-none');
                 hideError();
 
-                // Scroll al resultado
                 document.getElementById('decryptResult').scrollIntoView({ behavior: 'smooth' });
+
             } catch (error) {
-                showError('❌ El texto ingresado no es válido. Asegúrate de que esté correctamente encriptado.');
+                showError("❌ Error inesperado: " + error);
             }
         }
 
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(function() {
+            navigator.clipboard.writeText(text).then(() => {
                 alert('✅ Texto desencriptado copiado al portapapeles');
             });
         }
