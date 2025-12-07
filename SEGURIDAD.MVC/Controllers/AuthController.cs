@@ -42,7 +42,7 @@ namespace SEGURIDAD.MVC.Controllers
             }
 
             // Guardar sesión
-            HttpContext.Session.SetString("usuario", usuario.Correo);
+            //HttpContext.Session.SetString("usuario", usuario.Correo);
 
             return RedirectToAction("Index", "Home");
         }
