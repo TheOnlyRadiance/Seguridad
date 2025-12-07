@@ -13,6 +13,14 @@ var bdConfig = new BdSQLConfiguration(
 
 builder.Services.AddSingleton(bdConfig);
 
+//inicio de sesion
+builder.Services.AddSession();
+
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();
+
+
+
+
 //Registrar clave AES64 
 var keyBase64 = builder.Configuration["Encryption:Key"];
 var key = Convert.FromBase64String(keyBase64);
@@ -35,6 +43,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
+
 
 app.UseAuthorization();
 

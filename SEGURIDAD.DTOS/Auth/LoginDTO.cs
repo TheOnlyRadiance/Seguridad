@@ -10,7 +10,7 @@ namespace SEGURIDAD.DTOS.Auth
     public class LoginDTO
     {
         [Required(ErrorMessage ="El usuario no ha sido proporcionado.")]
-        public string? Username { get; set; }
+        public string? correo { get; set; }
 
         [Required(ErrorMessage ="La contraseña no ha sido proporcionada")]
         public string? Contrasena { get; set; }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SEGURIDAD.DATA\SEGURIDAD.DATA.csproj" />
     <ProjectReference Include="..\SEGURIDAD.DTOS\SEGURIDAD.DTOS.csproj" />
   </ItemGroup>

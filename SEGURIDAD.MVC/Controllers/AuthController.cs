@@ -1,79 +1,58 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SEGURIDAD.DATA.Interfaces;
 
 namespace SEGURIDAD.MVC.Controllers
 {
     public class AuthController : Controller
     {
-        // GET: AuthController
-        public ActionResult Login()
+
+        private readonly ILoginRepository _loginRepository;
+
+        public AuthController(ILoginRepository loginRepository)
+        {
+            _loginRepository = loginRepository;
+        }
+
+        // Vista Login
+        public IActionResult Login()
         {
             return View();
         }
 
-        // GET: AuthController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: AuthController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-
-        //Login simulado :)
-        // POST: AuthController/Create
+        // Procesar Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(string email, string password)
+        public IActionResult Login(string email, string password)
         {
+            // Buscar usuario por correo
+            var usuario = _loginRepository.Login(email);
+
+            if (usuario == null)
+            {
+                ViewBag.Error = "El usuario no existe";
+                return View();
+            }
+
+            // Comparar contraseñas (sin cifrado)
+            if (usuario.Contrasena != password)
+            {
+                ViewBag.Error = "Contraseña incorrecta";
+                return View();
+            }
+
+            // Guardar sesión
+            HttpContext.Session.SetString("usuario", usuario.Correo);
 
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: AuthController/Edit/5
-        public ActionResult Edit(int id)
+        // Cerrar sesión
+        public IActionResult Logout()
         {
-            return View();
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
         }
 
-        // POST: AuthController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: AuthController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: AuthController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }
