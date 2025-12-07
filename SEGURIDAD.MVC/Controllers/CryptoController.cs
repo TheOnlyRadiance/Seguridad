@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using SEGURIDAD.DATA.Interfaces;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SEGURIDAD.MVC.Controllers
 {
     [EnableRateLimiting("IPSafePolicy")]
+    [Authorize]
     public class CryptoController : Controller
     {
         private readonly ICryptoService _encryption;

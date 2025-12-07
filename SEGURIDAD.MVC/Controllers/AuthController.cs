@@ -1,58 +1,113 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SEGURIDAD.DATA.Interfaces;
+using SEGURIDAD.DTOS.Auth;
 
 namespace SEGURIDAD.MVC.Controllers
 {
     public class AuthController : Controller
     {
-
         private readonly ILoginRepository _loginRepository;
+        private readonly ITokenRepository _tokenService;
 
-        public AuthController(ILoginRepository loginRepository)
+        public AuthController(ILoginRepository loginRepository, ITokenRepository tokenService)
         {
             _loginRepository = loginRepository;
+            _tokenService = tokenService;
         }
 
-        // Vista Login
+        // -------------------------------
+        // LOGIN (GET)
+        // -------------------------------
         public IActionResult Login()
         {
             return View();
         }
 
-        // Procesar Login
+        // -------------------------------
+        // LOGIN (POST)
+        // -------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password)
         {
-            // Buscar usuario por correo
             var usuario = _loginRepository.Login(email);
 
             if (usuario == null)
             {
                 ViewBag.Error = "El usuario no existe";
-                return View();
+                return View("Login");
             }
 
-            // Comparar contraseñas (sin cifrado)
-            if (usuario.Contrasena != password)
+            if (!BCrypt.Net.BCrypt.Verify(password, usuario.Contrasena))
             {
                 ViewBag.Error = "Contraseña incorrecta";
-                return View();
+                return View("Login");
             }
 
-            // Guardar sesión
-            //HttpContext.Session.SetString("usuario", usuario.Correo);
+            // GENERAR JWT
+            var token = _tokenService.GenerateToken(usuario.Correo, usuario.IdUsuario);
+
+            Response.Cookies.Append("jwt_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
 
             return RedirectToAction("Index", "Home");
         }
 
-        // Cerrar sesión
+        // -------------------------------
+        // LOGOUT
+        // -------------------------------
         public IActionResult Logout()
         {
+            Response.Cookies.Delete("jwt_token");
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
+        // -------------------------------
+        // REGISTRO (GET)
+        // -------------------------------
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // -------------------------------
+        // REGISTRO (POST)
+        // -------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(RegistroDTO model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var existe = _loginRepository.Login(model.Correo);
+
+            if (existe != null)
+            {
+                ViewBag.Error = "El correo ya está registrado.";
+                return View(model);
+            }
+
+            // HASH DE CONTRASEÑA
+            var hash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
+
+            var ok = _loginRepository.RegistrarUsuario(model.Correo, hash);
+
+            if (!ok)
+            {
+                ViewBag.Error = "No se pudo registrar el usuario.";
+                return View(model);
+            }
+
+            TempData["mensaje"] = "Usuario registrado correctamente. Ahora inicia sesión.";
+            return RedirectToAction("Login");
+        }
     }
 }

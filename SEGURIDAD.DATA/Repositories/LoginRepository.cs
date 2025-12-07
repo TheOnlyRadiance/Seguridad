@@ -1,13 +1,8 @@
 ﻿using SEGURIDAD.DATA.Interfaces;
 using SEGURIDAD.DATA.Modelos;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Npgsql;
 using Dapper;
-
 
 namespace SEGURIDAD.DATA.Repositories
 {
@@ -20,15 +15,38 @@ namespace SEGURIDAD.DATA.Repositories
             _config = config;
         }
 
+        // ---------------------------------------------------
+        // LOGIN (obtiene usuario por correo)
+        // ---------------------------------------------------
         public UsuarioModel Login(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo)) return null;
+
+            using var connection = new NpgsqlConnection(_config.ConnectionString);
+
+            string sql = @"SELECT idusuario, correo, contrasena
+                           FROM usuarios
+                           WHERE correo = @correo";
+
+            return connection.QueryFirstOrDefault<UsuarioModel>(sql, new { correo });
+        }
+
+        // ---------------------------------------------------
+        // REGISTRO (solo inserta — el hash ya debe venir desde AuthController)
+        // ---------------------------------------------------
+        public bool RegistrarUsuario(string correo, string contrasenaHasheada)
         {
             using var connection = new NpgsqlConnection(_config.ConnectionString);
 
-            string sql = @"SELECT idusuario, correo, contrasena 
-                       FROM usuarios 
-                       WHERE correo = @correo";
+            string sql = @"
+                INSERT INTO usuarios (correo, contrasena)
+                VALUES (@correo, @contrasenaHasheada)
+                RETURNING idusuario;
+            ";
 
-            return connection.QueryFirstOrDefault<UsuarioModel>(sql, new { correo });
+            var id = connection.ExecuteScalar<int?>(sql, new { correo, contrasenaHasheada });
+
+            return id.HasValue;
         }
     }
 }

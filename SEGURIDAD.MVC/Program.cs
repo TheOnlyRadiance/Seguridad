@@ -3,82 +3,119 @@ using SEGURIDAD.DATA.Interfaces;
 using SEGURIDAD.DATA.Repositories;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// -------------------------------------------------------------
+// MVC
+// -------------------------------------------------------------
 builder.Services.AddControllersWithViews();
 
-// Conexion a la BD
-var bdConfig = new BdSQLConfiguration(
-    builder.Configuration.GetConnectionString("DefaultConnection")!);
-builder.Services.AddSingleton(bdConfig);
-
-//inicio de sesion
+// Sessions
 builder.Services.AddSession();
 
+// -------------------------------------------------------------
+// BASE DE DATOS
+// -------------------------------------------------------------
+var bdConfig = new BdSQLConfiguration(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddSingleton(bdConfig);
+
+// Repositorios
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
+builder.Services.AddSingleton<ITokenRepository, TokenRepository>();
 
-
-
-
-//Registrar clave AES64 
+// -------------------------------------------------------------
+// 🔐 AES-GCM — clave Base64 desde appsettings.json
+// -------------------------------------------------------------
 var keyBase64 = builder.Configuration["Encryption:Key"];
-var key = Convert.FromBase64String(keyBase64);
+if (string.IsNullOrEmpty(keyBase64))
+    throw new Exception("❌ ERROR: Falta Encryption:Key en appsettings.json");
 
-// Registrar servicio AES-GCM
-builder.Services.AddSingleton<ICryptoService>(
-    sp => new CriptoRepository(key)
+var keyBytes = Convert.FromBase64String(keyBase64);
+
+// Registrar ICryptoService (MUY IMPORTANTE)
+builder.Services.AddSingleton<ICryptoService>(sp =>
+    new CriptoRepository(keyBytes)
 );
 
-// ------------------------
-// PROTECCI�N DDoS / RATE LIMIT
-// ------------------------
+// -------------------------------------------------------------
+// 🔥 JWT CONFIG
+// -------------------------------------------------------------
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+    throw new Exception("❌ ERROR: Falta Jwt:Key en appsettings.json");
+
+var jwtKeyBytes = Convert.FromBase64String(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(jwtKeyBytes),
+
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+
+        ValidateLifetime = true,
+
+        // 🔥 evita errores raros con la fecha del token
+        ClockSkew = TimeSpan.Zero
+    };
+
+    // 🔥 JWT desde cookie
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Cookies["jwt_token"];
+
+            if (!string.IsNullOrEmpty(token))
+                context.Token = token;
+
+            return Task.CompletedTask;
+        }
+    };
+});
+
+// -------------------------------------------------------------
+// 🛡 RATE LIMIT (DDoS protection)
+// -------------------------------------------------------------
 builder.Services.AddRateLimiter(options =>
 {
-    // Limite global (para TODAS las solicitudes)
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
-            httpContext.User.Identity?.Name ??
-            httpContext.Connection.RemoteIpAddress?.ToString() ??
-            "anonymous",
-            partition => new FixedWindowRateLimiterOptions
+            context.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            _ => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 17, //peticiones que pueda hacer
+                PermitLimit = 17,
                 QueueLimit = 0,
                 Window = TimeSpan.FromMinutes(1)
             }));
-
-    // L�mite nombrado (para endpoints espec�ficos)
-    options.AddFixedWindowLimiter("fixed", opt =>
-    {
-        opt.PermitLimit = 8; //solicitudes que le da
-        opt.Window = TimeSpan.FromSeconds(12); //Cada 12 segundos te da 8 peticiones
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;
-    });
-});
-
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Limits.MaxRequestBodySize = 1_000_000; // l�mite 1 MB por request
 });
 
 var app = builder.Build();
 
-// Middleware Rate Limiter (antes de Routing)
+// -------------------------------------------------------------
+// ORDEN DE MIDDLEWARES (IMPORTANTE)
+// -------------------------------------------------------------
 app.UseRateLimiter();
 
-app.UseRouting();
-
-// Aplicar RateLimiter a controladores (solo al que quieras)
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers().RequireRateLimiting("fixed");
-});
-
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -90,11 +127,16 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// SESSION va ANTES del auth
 app.UseSession();
 
-
+// 🔐 autenticación JWT
+app.UseAuthentication();
 app.UseAuthorization();
 
+// -------------------------------------------------------------
+// RUTEO MVC
+// -------------------------------------------------------------
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");

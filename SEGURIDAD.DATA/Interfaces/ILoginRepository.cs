@@ -10,5 +10,7 @@ namespace SEGURIDAD.DATA.Interfaces
     public interface ILoginRepository
     {
         UsuarioModel Login(string correo);
+
+        bool RegistrarUsuario(string correo, string contrasena);
     }
 }
