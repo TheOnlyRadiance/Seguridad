@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SEGURIDAD.DATA.Interfaces;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace SEGURIDAD.MVC.Controllers
 {
+    [EnableRateLimiting("IPSafePolicy")]
     public class CryptoController : Controller
     {
         private readonly ICryptoService _encryption;
@@ -13,12 +15,14 @@ namespace SEGURIDAD.MVC.Controllers
             _encryption = encryption;
         }
 
+        
         public IActionResult Cifrar(string texto)
         {
             var cipher = _encryption.EncryptToBase64(texto);
             return Json(new { cifrado = cipher });
         }
 
+        
         public IActionResult Descifrar(string cipher)
         {
             try
