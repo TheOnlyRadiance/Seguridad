@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SEGURIDAD.DATA.Interfaces;
 using SEGURIDAD.DTOS.Auth;
@@ -19,8 +20,15 @@ namespace SEGURIDAD.MVC.Controllers
         // -------------------------------
         // LOGIN (GET)
         // -------------------------------
+        [AllowAnonymous]
         public IActionResult Login()
         {
+            // 🚫 Si YA está autenticado → NO puede entrar al login → Redirigido a Home
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View();
         }
 
@@ -28,6 +36,7 @@ namespace SEGURIDAD.MVC.Controllers
         // LOGIN (POST)
         // -------------------------------
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password)
         {
@@ -51,7 +60,7 @@ namespace SEGURIDAD.MVC.Controllers
             Response.Cookies.Append("jwt_token", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = false, // pon true en producción
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
@@ -64,16 +73,33 @@ namespace SEGURIDAD.MVC.Controllers
         // -------------------------------
         public IActionResult Logout()
         {
+            // 🔥 Forma segura de borrar el token
+            Response.Cookies.Append("jwt_token", "", new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddDays(-1),
+                Secure = false,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax
+            });
+
             Response.Cookies.Delete("jwt_token");
             HttpContext.Session.Clear();
+
             return RedirectToAction("Login");
         }
 
         // -------------------------------
         // REGISTRO (GET)
         // -------------------------------
+        [AllowAnonymous]
         public IActionResult Register()
         {
+            // 🚫 No permitir entrar al registro con token activo
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View();
         }
 
@@ -81,6 +107,7 @@ namespace SEGURIDAD.MVC.Controllers
         // REGISTRO (POST)
         // -------------------------------
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public IActionResult Register(RegistroDTO model)
         {
@@ -95,9 +122,8 @@ namespace SEGURIDAD.MVC.Controllers
                 return View(model);
             }
 
-            // HASH DE CONTRASEÑA
+            // Hash de contraseña
             var hash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
-
             var ok = _loginRepository.RegistrarUsuario(model.Correo, hash);
 
             if (!ok)
