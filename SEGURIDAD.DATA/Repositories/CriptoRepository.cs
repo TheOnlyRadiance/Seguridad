@@ -1,4 +1,5 @@
-﻿using SEGURIDAD.DATA.Interfaces;
+﻿
+using SEGURIDAD.DATA.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

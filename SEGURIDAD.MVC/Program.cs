@@ -14,7 +14,15 @@ var bdConfig = new BdSQLConfiguration(
     builder.Configuration.GetConnectionString("DefaultConnection")!);
 builder.Services.AddSingleton(bdConfig);
 
-// Registrar clave AES64 
+//inicio de sesion
+builder.Services.AddSession();
+
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();
+
+
+
+
+//Registrar clave AES64 
 var keyBase64 = builder.Configuration["Encryption:Key"];
 var key = Convert.FromBase64String(keyBase64);
 
@@ -24,7 +32,7 @@ builder.Services.AddSingleton<ICryptoService>(
 );
 
 // ------------------------
-// PROTECCIÓN DDoS / RATE LIMIT
+// PROTECCIï¿½N DDoS / RATE LIMIT
 // ------------------------
 builder.Services.AddRateLimiter(options =>
 {
@@ -42,7 +50,7 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1)
             }));
 
-    // Límite nombrado (para endpoints específicos)
+    // Lï¿½mite nombrado (para endpoints especï¿½ficos)
     options.AddFixedWindowLimiter("fixed", opt =>
     {
         opt.PermitLimit = 8; //solicitudes que le da
@@ -54,7 +62,7 @@ builder.Services.AddRateLimiter(options =>
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Limits.MaxRequestBodySize = 1_000_000; // límite 1 MB por request
+    serverOptions.Limits.MaxRequestBodySize = 1_000_000; // lï¿½mite 1 MB por request
 });
 
 var app = builder.Build();
@@ -79,6 +87,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseSession();
+
 
 app.UseAuthorization();
 

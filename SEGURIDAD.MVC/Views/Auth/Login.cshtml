@@ -27,6 +27,13 @@ ViewData["OcultarMenu"] = true;
                             <input type="password" class="form-control" id="password" name="password" placeholder="******" required>
                         </div>
 
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger">
+                                @ViewBag.Error
+                            </div>
+                        }
+
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Entrar</button>
                         </div>
