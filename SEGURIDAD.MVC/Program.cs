@@ -97,17 +97,32 @@ builder.Services.AddAuthentication(options =>
 // -------------------------------------------------------------
 builder.Services.AddRateLimiter(options =>
 {
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+        // Mensaje de error personalizado
+        await context.HttpContext.Response.WriteAsync(
+            "Has superado el límite de peticiones. Por favor espera unos segundos e intenta nuevamente.");
+    };
+
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-        RateLimitPartition.GetFixedWindowLimiter(
+        RateLimitPartition.GetTokenBucketLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "anon",
-            _ => new FixedWindowRateLimiterOptions
+            _ => new TokenBucketRateLimiterOptions
             {
+                TokenLimit = 100, //peticiones por usuario
+                TokensPerPeriod = 20, //Recarga cada periodo
+                ReplenishmentPeriod = TimeSpan.FromSeconds(5), //Cada 5 Segundos
                 AutoReplenishment = true,
-                PermitLimit = 17,
                 QueueLimit = 0,
-                Window = TimeSpan.FromMinutes(1)
-            }));
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }
+        )
+    );
 });
+
+
 
 var app = builder.Build();
 
