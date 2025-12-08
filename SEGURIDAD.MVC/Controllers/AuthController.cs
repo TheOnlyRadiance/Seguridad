@@ -61,7 +61,7 @@ namespace SEGURIDAD.MVC.Controllers
             {
                 HttpOnly = true,
                 Secure = true, // <---- OBLIGATORIO EN PRODUCCIÓN
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
 
