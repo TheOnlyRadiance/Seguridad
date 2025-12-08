@@ -111,7 +111,7 @@ builder.Services.AddRateLimiter(options =>
             context.Connection.RemoteIpAddress?.ToString() ?? "anon",
             _ => new TokenBucketRateLimiterOptions
             {
-                TokenLimit = 100, //peticiones por usuario
+                TokenLimit = 20, //peticiones por usuario
                 TokensPerPeriod = 20, //Recarga cada periodo
                 ReplenishmentPeriod = TimeSpan.FromSeconds(5), //Cada 5 Segundos
                 AutoReplenishment = true,
