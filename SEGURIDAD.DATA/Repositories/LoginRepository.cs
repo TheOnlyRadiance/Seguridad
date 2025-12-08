@@ -39,21 +39,19 @@ namespace SEGURIDAD.DATA.Repositories
         {
             if (string.IsNullOrWhiteSpace(correo)) return false;
 
-            // Regex simple: debe tener @ y terminar en .com
-            var regex = new Regex(@"^[^@\s]+@[^@\s]+\.com$", RegexOptions.IgnoreCase);
+            // Regex: debe tener formato válido y terminar en .com
+            var regex = new Regex(@"^[^@\s]+@[^@\s]+\.[cC][oO][mM]$", RegexOptions.IgnoreCase);
             return regex.IsMatch(correo);
         }
 
         // ---------------------------------------------------
-        // REGISTRO (solo inserta — el hash ya debe venir desde AuthController)
+        // REGISTRO (solo inserta — hash debe venir desde AuthController)
         // ---------------------------------------------------
         public bool RegistrarUsuario(string correo, string contrasenaHasheada)
         {
-            // Validar correo antes de intentar registrar
+            // Validar correo
             if (!ValidarCorreo(correo))
-            {
                 throw new ArgumentException("El correo debe ser válido y terminar en .com");
-            }
 
             using var connection = new NpgsqlConnection(_config.ConnectionString);
 
@@ -67,6 +65,5 @@ namespace SEGURIDAD.DATA.Repositories
 
             return id.HasValue;
         }
-
     }
 }

@@ -1,150 +1,537 @@
 ﻿@{
     ViewData["Title"] = "Encriptar";
 }
-
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Encriptar Texto</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Proyecto Final Seguridad</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        :root {
+            --cyan: #00ffff;
+            --purple: #9d4edd;
+            --dark: #0f0f1e;
+            --card-bg: #1a1a2e;
+            --green: #00ff88;
+            --red: #ff6b6b;
+        }
+
+        /* === FORZAR CENTRADO COMPLETO === */
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--dark);
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            background: #f0f2f5;
-            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             min-height: 100vh;
+            position: relative;
+            padding: 20px;
         }
 
-        .container {
-            max-width: 720px;
-            margin-top: 50px;
+            /* Fondo animado con tonalidad púrpura */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: radial-gradient(circle at 30% 70%, rgba(157,78,221,0.08), transparent 50%), radial-gradient(circle at 70% 30%, rgba(157,78,221,0.06), transparent 50%), radial-gradient(circle at 50% 50%, rgba(0,255,255,0.04), transparent 50%);
+                z-index: -1;
+                animation: pulse 12s infinite alternate;
+            }
+
+        @@keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 0.8;
+            }
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
             flex: 1;
+            margin-top: 30px;
         }
 
-        .card {
-            border-radius: 15px;
-            border: none;
+        /* TARJETA CYBERNÉTICA CON TONO PÚRPURA */
+        .encrypt-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            width: 100%;
+            box-shadow: 0 0 50px rgba(157,78,221,0.4), 0 0 100px rgba(157,78,221,0.2);
+            border: 1px solid rgba(157,78,221,0.5);
+            backdrop-filter: blur(15px);
+            z-index: 10;
+            margin-bottom: 30px;
         }
 
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #2d1b69 0%, #4a1e7c 100%);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(157,78,221,0.6);
         }
 
-        .form-label {
-            font-weight: 600;
-        }
-
-        textarea.form-control {
-            border-radius: 10px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-            resize: none;
-        }
-
-        .btn-encrypt {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-            .btn-encrypt:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            .card-header i {
+                font-size: 3.5rem;
+                color: var(--purple);
+                margin-bottom: 1rem;
+                text-shadow: 0 0 40px rgba(157,78,221,0.8);
+                filter: drop-shadow(0 0 10px rgba(157,78,221,0.5));
             }
 
+            .card-header h2 {
+                margin: 0;
+                font-weight: 800;
+                font-size: 2.2rem;
+                color: var(--purple);
+                text-shadow: 0 0 25px rgba(157,78,221,0.7);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .card-header small {
+                color: rgba(255,255,255,0.8);
+                font-size: 1rem;
+                display: block;
+                margin-top: 0.5rem;
+            }
+
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* INPUTS Y TEXTAREAS CYBERNÉTICOS */
+        .form-label {
+            color: var(--purple);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            display: block;
+            text-shadow: 0 0 10px rgba(157,78,221,0.5);
+        }
+
+        .form-control, textarea.form-control {
+            background: rgba(255,255,255,0.07) !important;
+            border: 1px solid rgba(157,78,221,0.5);
+            color: #fff !important;
+            border-radius: 15px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+            width: 100%;
+            font-family: 'Consolas', 'Monaco', monospace;
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+            box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+        }
+
+            .form-control:focus, textarea.form-control:focus {
+                background: rgba(157,78,221,0.15) !important;
+                border-color: var(--purple);
+                box-shadow: 0 0 25px rgba(157,78,221,0.6), 0 0 0px 1000px rgba(157,78,221,0.15) inset !important;
+                color: #fff !important;
+                outline: none;
+            }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* BOTÓN ENCRIPTAR */
+        .btn-encrypt {
+            background: linear-gradient(135deg, var(--purple) 0%, #c77dff 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            padding: 1.2rem 3rem;
+            border: none;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            display: block;
+            margin: 2rem auto;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+            .btn-encrypt::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: 0.5s;
+            }
+
+            .btn-encrypt:hover {
+                background: linear-gradient(135deg, #c77dff 0%, var(--purple) 100%);
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(157,78,221,0.7);
+            }
+
+                .btn-encrypt:hover::before {
+                    left: 100%;
+                }
+
+        /* RESULTADO ENCRIPTADO */
+        .result-container {
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
         .result-box {
-            background-color: #ffffff;
-            border-left: 5px solid #667eea;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            background: rgba(157,78,221,0.1);
+            border: 1px solid rgba(157,78,221,0.4);
+            border-left: 5px solid var(--purple);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 0 20px rgba(157,78,221,0.3);
             transition: all 0.3s ease;
         }
 
             .result-box:hover {
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                box-shadow: 0 0 30px rgba(157,78,221,0.5);
+                transform: translateY(-2px);
             }
 
-        .btn-outline-primary, .btn-outline-secondary {
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        #errorMessage {
+        #encryptedText {
+            color: #fff;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
             border-radius: 10px;
-            font-weight: 500;
+            border: 1px solid rgba(157,78,221,0.3);
         }
 
-        footer {
+        /* BOTONES DE ACCIÓN */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-action {
+            flex: 1;
+            border-radius: 10px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border: 2px solid;
+            background: transparent;
+        }
+
+        .btn-copy {
+            color: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+            .btn-copy:hover {
+                background: var(--cyan);
+                color: #000;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,255,255,0.3);
+            }
+
+        .btn-clear {
+            color: var(--red);
+            border-color: var(--red);
+        }
+
+            .btn-clear:hover {
+                background: var(--red);
+                color: #fff;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+            }
+
+        /* MENSAJES DE ERROR Y ÉXITO */
+        .alert-danger {
+            background: rgba(231,76,60,0.25);
+            border: 1px solid #e74c3c;
+            color: #ffb3b3;
+            border-radius: 1rem;
+            padding: 1rem;
             text-align: center;
-            padding: 15px 0;
+            width: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(0,255,136,0.25);
+            border: 1px solid var(--green);
+            color: #b3ffd9;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-text {
+            color: rgba(255,255,255,0.6);
             font-size: 0.9rem;
-            color: #6c757d;
+            margin-top: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CONTADOR DE CARACTERES */
+        .char-counter {
+            color: rgba(157,78,221,0.7);
+            font-size: 0.9rem;
+            text-align: right;
+            margin-top: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+            .char-counter.warning {
+                color: #ffa500;
+            }
+
+            .char-counter.danger {
+                color: var(--red);
+            }
+
+        /* FOOTER */
+        footer {
+            position: relative;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(157,78,221,0.5);
+            font-size: 0.95rem;
+            z-index: 5;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .encrypt-card {
+                max-width: 100%;
+            }
+
+            .card-header {
+                padding: 2rem 1.5rem;
+            }
+
+                .card-header i {
+                    font-size: 3rem;
+                }
+
+                .card-header h2 {
+                    font-size: 1.8rem;
+                }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .btn-encrypt {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            footer {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                padding: 0 20px;
+            }
+        }
+
+        @@media (max-height: 700px) {
+            .main-container {
+                margin-top: 20px;
+            }
+
+            .card-header {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card shadow-sm">
-            <div class="card-header text-center">
-                <h3 class="mb-0">ENCRIPTAR TEXTO</h3>
+    <div class="main-container">
+        <div class="encrypt-card shadow-lg">
+            <div class="card-header">
+                <i class="bi bi-lock-fill"></i>
+                <h2>Encriptar Texto</h2>
+                <small>Proyecto Final - Seguridad Criptográfica</small>
             </div>
-            <div class="card-body p-4">
+
+            <div class="card-body">
+                <!-- Texto a Encriptar -->
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Texto a Encriptar:</label>
-                    <textarea id="inputText" class="form-control" rows="5"
-                              placeholder="Escribe aquí el texto que quieres encriptar..."></textarea>
+                    <label class="form-label">Texto a Encriptar:</label>
+                    <textarea id="inputText" class="form-control" rows="6"
+                              placeholder="Escribe aquí el texto que quieres encriptar..."
+                              oninput="updateCharCount()"></textarea>
                     <div class="form-text">Tu texto será convertido a formato encriptado seguro.</div>
+                    <div id="charCount" class="char-counter">0 caracteres</div>
                 </div>
 
-                <div class="text-center mb-4">
-                    <button type="button" class="btn btn-encrypt text-white btn-lg px-5" onclick="encryptText()">
+                <!-- Botón Encriptar -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-encrypt" onclick="encryptText()" id="encryptBtn">
                         <i class="bi bi-lock me-2"></i> ENCRIPTAR
                     </button>
                 </div>
 
-                <div id="encryptResult" class="d-none">
-                    <label class="form-label fw-bold">Texto Encriptado:</label>
-                    <div class="result-box p-3">
-                        <pre id="encryptedText" class="mb-2 fs-6"></pre>
-                        <div class="mt-3 d-flex gap-2">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('encryptedText')">
-                                <i class="bi bi-clipboard me-1"></i> Copiar
+                <!-- Mensaje de error -->
+                <div id="errorMessage" class="alert alert-danger d-none"></div>
+
+                <!-- Mensaje de éxito -->
+                <div id="successMessage" class="alert alert-success d-none">✅ Texto copiado al portapapeles</div>
+
+                <!-- Resultado Encriptado -->
+                <div id="encryptResult" class="result-container d-none">
+                    <label class="form-label">Texto Encriptado:</label>
+                    <div class="result-box">
+                        <pre id="encryptedText" class="mb-2"></pre>
+                        <div class="action-buttons">
+                            <button type="button" class="btn-action btn-copy" onclick="copyToClipboard('encryptedText')">
+                                <i class="bi bi-clipboard me-1"></i> Copiar Cifrado
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAll()">
-                                <i class="bi bi-x-circle me-1"></i> Limpiar
+                            <button type="button" class="btn-action btn-clear" onclick="clearAll()">
+                                <i class="bi bi-x-circle me-1"></i> Limpiar Todo
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div id="errorMessage" class="alert alert-danger d-none mt-3"></div>
             </div>
         </div>
     </div>
 
+    <footer>
+        © 2025 Proyecto Final - Seguridad Informática
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Función para formatear el texto encriptado (agrupar cada 60 caracteres)
         function formatEncryptedText(text) {
-            return text.match(/.{1,60}/g)?.join('\n') ?? text;
+            // Remover cualquier espacio o salto de línea existente
+            const cleanText = text.replace(/\s/g, '');
+            // Agrupar cada 60 caracteres con salto de línea
+            return cleanText.match(/.{1,60}/g)?.join('\n') || cleanText;
+        }
+
+        // Función para actualizar el contador de caracteres
+        function updateCharCount() {
+            const text = document.getElementById('inputText').value;
+            const count = text.length;
+            const counter = document.getElementById('charCount');
+
+            counter.textContent = `${count} caracter${count !== 1 ? 'es' : ''}`;
+
+            // Cambiar color según la longitud
+            counter.className = 'char-counter';
+            if (count > 1000) {
+                counter.classList.add('danger');
+            } else if (count > 500) {
+                counter.classList.add('warning');
+            }
         }
 
         async function encryptText() {
             const inputText = document.getElementById('inputText').value.trim();
 
+            // Validación
             if (!inputText) {
                 showError('❌ Por favor ingresa un texto para encriptar');
                 return;
             }
 
+            if (inputText.length > 2000) {
+                showError('❌ El texto es demasiado largo (máximo 2000 caracteres)');
+                return;
+            }
+
+            // Mostrar indicador de carga
+            const encryptBtn = document.getElementById('encryptBtn');
+            const originalText = encryptBtn.innerHTML;
+            encryptBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> ENCRIPTANDO...';
+            encryptBtn.disabled = true;
+
             try {
+                // Llamada al backend
                 const response = await fetch(`/Crypto/Cifrar?texto=${encodeURIComponent(inputText)}`);
+
+                // Restaurar botón
+                encryptBtn.innerHTML = originalText;
+                encryptBtn.disabled = false;
 
                 if (!response.ok) {
                     showError("❌ Error al comunicarse con el servidor");
@@ -153,40 +540,86 @@
 
                 const data = await response.json();
 
-                document.getElementById('encryptedText').textContent = formatEncryptedText(data.cifrado);
+                if (data.error) {
+                    showError('❌ ' + data.error);
+                    return;
+                }
+
+                // Formatear y mostrar resultado
+                const formattedText = formatEncryptedText(data.cifrado || data.textoEncriptado || data);
+                document.getElementById('encryptedText').textContent = formattedText;
                 document.getElementById('encryptResult').classList.remove('d-none');
                 hideError();
 
-                document.getElementById('encryptResult').scrollIntoView({ behavior: 'smooth' });
+                // Scroll suave al resultado
+                document.getElementById('encryptResult').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
 
             } catch (error) {
-                showError("❌ Error inesperado: " + error);
+                // Restaurar botón en caso de error
+                encryptBtn.innerHTML = originalText;
+                encryptBtn.disabled = false;
+
+                showError("❌ Error inesperado: " + error.message);
             }
         }
 
         function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text.replace(/\n/g, '')).then(() => {
-                alert('✅ Texto encriptado copiado al portapapeles');
+            const text = document.getElementById(elementId).textContent.replace(/\n/g, '');
+            navigator.clipboard.writeText(text).then(() => {
+                // Mostrar mensaje de éxito
+                const successDiv = document.getElementById('successMessage');
+                successDiv.classList.remove('d-none');
+                setTimeout(() => {
+                    successDiv.classList.add('d-none');
+                }, 3000);
+            }).catch(err => {
+                showError('❌ Error al copiar al portapapeles: ' + err);
             });
         }
 
         function clearAll() {
             document.getElementById('inputText').value = '';
             document.getElementById('encryptResult').classList.add('d-none');
+            document.getElementById('successMessage').classList.add('d-none');
             hideError();
+            updateCharCount();
+
+            // Enfocar el textarea
+            document.getElementById('inputText').focus();
         }
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             errorDiv.classList.remove('d-none');
+
+            // Ocultar automáticamente después de 5 segundos
+            setTimeout(() => {
+                hideError();
+            }, 5000);
         }
 
         function hideError() {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.classList.add('d-none');
         }
+
+        // Permitir usar Enter para encriptar (Shift+Enter para nueva línea)
+        document.getElementById('inputText').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                encryptText();
+            }
+        });
+
+        // Auto-focus al textarea al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('inputText').focus();
+            updateCharCount();
+        });
     </script>
 </body>
 </html>

@@ -122,18 +122,33 @@ namespace SEGURIDAD.MVC.Controllers
                 return View(model);
             }
 
-            // Hash de contraseña
-            var hash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
-            var ok = _loginRepository.RegistrarUsuario(model.Correo, hash);
-
-            if (!ok)
+            try
             {
-                ViewBag.Error = "No se pudo registrar el usuario.";
+                // Hash de contraseña
+                var hash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
+
+                var ok = _loginRepository.RegistrarUsuario(model.Correo, hash);
+
+                if (!ok)
+                {
+                    ViewBag.Error = "No se pudo registrar el usuario.";
+                    return View(model);
+                }
+
+                TempData["mensaje"] = "Usuario registrado correctamente. Ahora inicia sesión.";
+                return RedirectToAction("Login");
+            }
+            catch (ArgumentException ex)
+            {
+                // Mostrar mensaje de correo inválido en el front
+                ViewBag.Error = ex.Message;
                 return View(model);
             }
-
-            TempData["mensaje"] = "Usuario registrado correctamente. Ahora inicia sesión.";
-            return RedirectToAction("Login");
+            catch (Exception)
+            {
+                ViewBag.Error = "Ocurrió un error inesperado. Intente nuevamente.";
+                return View(model);
+            }
         }
     }
 }
