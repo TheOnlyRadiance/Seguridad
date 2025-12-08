@@ -77,7 +77,7 @@ namespace SEGURIDAD.MVC.Controllers
             Response.Cookies.Append("jwt_token", "", new CookieOptions
             {
                 Expires = DateTime.UtcNow.AddDays(-1),
-                Secure = false,
+                Secure = true,
                 HttpOnly = true,
                 SameSite = SameSiteMode.Lax
             });
