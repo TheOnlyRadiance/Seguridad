@@ -1,41 +1,521 @@
 ﻿@model SEGURIDAD.DTOS.Auth.RegistroDTO
 
 @{
-    ViewBag.Title = "Registro de Usuarios";
+    ViewData["Title"] = "Registro de Usuarios";
     ViewData["OcultarMenu"] = true;
 }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Proyecto Final Seguridad</title>
 
-<h2>Crear cuenta</h2>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger">@ViewBag.Error</div>
-}
+    <style>
+        :root {
+            --cyan: #00ffff;
+            --dark: #0f0f1e;
+            --card-bg: #1a1a2e;
+        }
 
-<form asp-action="Register" method="post">
-    @Html.AntiForgeryToken()
+        /* === FORZAR CENTRADO COMPLETO === */
+        * {
+            box-sizing: border-box;
+        }
 
-    <div class="form-group mb-3">
-        <label>Correo</label>
-        <input asp-for="Correo" class="form-control" />
-        <span asp-validation-for="Correo" class="text-danger"></span>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--dark);
+            overflow-x: hidden; /* Evitar scroll horizontal */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column; /* Para alinear elementos verticalmente */
+            align-items: center; /* Centra horizontalmente */
+            justify-content: center; /* Centra verticalmente */
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            padding: 20px; /* Espacio en los bordes */
+        }
+
+            /* Fondo animado */
+            body::before {
+                content: '';
+                position: fixed; /* Cambiado a fixed para cubrir toda la pantalla */
+                inset: 0;
+                background: radial-gradient(circle at 30% 70%, rgba(0,255,255,0.08), transparent 50%), radial-gradient(circle at 70% 30%, rgba(0,255,255,0.06), transparent 50%);
+                z-index: -1;
+                animation: pulse 12s infinite alternate;
+            }
+
+        @@keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* CONTENEDOR PRINCIPAL QUE GARANTIZA EL CENTRADO */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px; /* Ancho máximo */
+            margin: 0 auto; /* Centrado automático */
+            flex: 1;
+        }
+
+        .register-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 0 50px rgba(0,255,255,0.3), 0 0 100px rgba(0,255,255,0.15);
+            border: 1px solid rgba(0,255,255,0.35);
+            backdrop-filter: blur(15px);
+            z-index: 10;
+            margin: 0 auto; /* Centrado horizontal automático */
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,255,255,0.4);
+        }
+
+            .card-header i {
+                font-size: 3.5rem;
+                color: var(--cyan);
+                margin-bottom: 1rem;
+                text-shadow: 0 0 40px rgba(0,255,255,0.6);
+            }
+
+            .card-header h2 {
+                margin: 0;
+                font-weight: 800;
+                font-size: 2.2rem;
+                color: var(--cyan);
+                text-shadow: 0 0 25px rgba(0,255,255,0.7);
+                letter-spacing: 1px;
+            }
+
+            .card-header small {
+                color: rgba(255,255,255,0.8);
+                font-size: 1rem;
+                display: block;
+                margin-top: 0.5rem;
+            }
+
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* CONTENEDOR DE CAMPO CON MENSAJE ARRIBA */
+        .field-container {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        /* MENSAJE DE VALIDACIÓN ARRIBA DEL INPUT */
+        .validation-message {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 0.3rem;
+            padding-left: 1.5rem;
+            min-height: 1.2rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1.3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cyan);
+            font-size: 1.3rem;
+            z-index: 10;
+            opacity: 0.9;
+        }
+
+        /* INPUTS - ESTILOS CYBERNÉTICOS */
+        .form-control {
+            background: rgba(255,255,255,0.07) !important;
+            border: 1px solid rgba(0,255,255,0.4);
+            color: #fff !important;
+            border-radius: 50px;
+            padding: 1rem 1.3rem 1rem 3.8rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+            width: 100%;
+            /* Prevenir fondo blanco de autofill */
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+            box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+        }
+
+            .form-control:focus {
+                background: rgba(0,255,255,0.15) !important;
+                border-color: var(--cyan);
+                box-shadow: 0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset !important;
+                color: #fff !important;
+                outline: none;
+                -webkit-text-fill-color = '#fff' !important;
+                -webkit-box-shadow: 0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset !important;
+            }
+
+            /* Estilos para autofill */
+            .form-control:-webkit-autofill,
+            .form-control:-webkit-autofill:hover,
+            .form-control:-webkit-autofill:focus,
+            .form-control:-webkit-autofill:active {
+                -webkit-text-fill-color: #fff !important;
+                -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+                transition: background-color 5000s ease-in-out 0s;
+                color: #fff !important;
+                background-color: rgba(255,255,255,0.07) !important;
+            }
+
+        /* MENSAJES DE CONTRASEÑA */
+        .password-message {
+            color: #00ff88;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 0.3rem;
+            padding-left: 1.5rem;
+            min-height: 1.2rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .password-error {
+            color: #ff6b6b;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-3px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-register {
+            background: var(--cyan);
+            color: #000;
+            font-weight: 800;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            padding: 1rem;
+            border: none;
+            width: 100%;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            display: block;
+            margin: 1.5rem auto 0;
+        }
+
+            .btn-register:hover {
+                background: #00e6e6;
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0,255,255,0.6);
+            }
+
+            .btn-register:disabled {
+                background: rgba(0,255,255,0.3);
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+        .alert-danger {
+            background: rgba(231,76,60,0.25);
+            border: 1px solid #e74c3c;
+            color: #ffb3b3;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            transition: all 0.3s;
+        }
+
+            .text-link:hover {
+                color: #00cccc;
+                text-decoration: underline;
+                transform: translateX(5px);
+            }
+
+        footer {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0,255,255,0.5);
+            font-size: 0.95rem;
+            z-index: 5;
+            text-align: center;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .register-card {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .card-header {
+                padding: 2.5rem 1.5rem;
+            }
+
+                .card-header i {
+                    font-size: 3rem;
+                }
+
+                .card-header h2 {
+                    font-size: 2rem;
+                }
+
+            .card-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .validation-message,
+            .password-message {
+                padding-left: 1rem;
+            }
+
+            footer {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 30px;
+                padding: 0 20px;
+            }
+        }
+
+        @@media (max-height: 800px) {
+            .card-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.5rem 1.5rem;
+            }
+
+            .field-container {
+                margin-bottom: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="register-card">
+            <div class="card-header">
+                <i class="bi bi-person-plus-fill"></i>
+                <h2>Crear Cuenta</h2>
+                <small>Proyecto Final - Seguridad</small>
+            </div>
+
+            <div class="card-body">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <form asp-action="Register" method="post" autocomplete="on" id="registerForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- CORREO ELECTRÓNICO -->
+
+                    <div class="field-container">
+                        <span asp-validation-for="Correo" class="validation-message"></span>
+                        <div class="input-group">
+                            <i class="bi bi-envelope-fill input-icon"></i>
+                            <input asp-for="Correo" type="email" class="form-control" placeholder="Correo Electrónico"
+                                   required autocomplete="email"
+                                   pattern="^[^@@\s]+@@[^@@\s]+\.com$"
+                                   title="Ingrese un correo válido que termine en .com, ejemplo: usuario@dominio.com" />
+                        </div>
+                    </div>
+
+
+                    <!-- CONTRASEÑA -->
+                    <div class="field-container">
+                        <!-- MENSAJE ARRIBA DEL INPUT -->
+                        <span asp-validation-for="Contrasena" class="validation-message"></span>
+                        
+                        <div class="input-group">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input asp-for="Contrasena" type="password" class="form-control" id="password" placeholder="Contraseña" required autocomplete="new-password" />
+                        </div>
+                    </div>
+
+                    <!-- CONFIRMAR CONTRASEÑA -->
+                    <div class="field-container">
+                        <!-- MENSAJE DE CONFIRMACIÓN ARRIBA DEL INPUT -->
+                        <span id="passwordMatchMessage" class="password-message" style="display: none;">✓ Las contraseñas coinciden</span>
+                        <span id="passwordMismatchMessage" class="password-message password-error" style="display: none;">✗ Las contraseñas no coinciden</span>
+                        
+                        <div class="input-group">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirmar Contraseña" required autocomplete="new-password" />
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN DE REGISTRO -->
+                    <button type="submit" class="btn btn-register" id="submitBtn">
+                        Registrarse
+                    </button>
+                </form>
+
+                <!-- ENLACE PARA INICIAR SESIÓN -->
+                <div class="text-center">
+                    <a href="/Auth/Login" class="text-link">
+                        <i class="bi bi-arrow-left me-2"></i> ¿Ya tienes cuenta? Inicia sesión
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group mb-3">
-        <label>Contraseña</label>
-        <input asp-for="Contrasena" type="password" class="form-control" />
-        <span asp-validation-for="Contrasena" class="text-danger"></span>
-    </div>
+    <footer>© 2025 Proyecto Final - Seguridad Informática</footer>
 
-    <button class="btn btn-primary">Registrarse</button>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    <div>
-    <a href="/Auth/Login" class="btn btn-link">¿Ya tienes cuenta? Inicia sesión</a>
-    </div>
-</form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const submitBtn = document.getElementById('submitBtn');
+            const matchMessage = document.getElementById('passwordMatchMessage');
+            const mismatchMessage = document.getElementById('passwordMismatchMessage');
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            // Función para validar coincidencia de contraseñas
+            function validatePasswords() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                if (password === '' && confirmPassword === '') {
+                    matchMessage.style.display = 'none';
+                    mismatchMessage.style.display = 'none';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                if (confirmPassword === '') {
+                    matchMessage.style.display = 'none';
+                    mismatchMessage.style.display = 'none';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                if (password === confirmPassword) {
+                    matchMessage.style.display = 'block';
+                    mismatchMessage.style.display = 'none';
+                    submitBtn.disabled = false;
+                } else {
+                    matchMessage.style.display = 'none';
+                    mismatchMessage.style.display = 'block';
+                    submitBtn.disabled = true;
+                }
+            }
+
+            // Event listeners para validar en tiempo real
+            passwordInput.addEventListener('input', validatePasswords);
+            confirmPasswordInput.addEventListener('input', validatePasswords);
+
+            // Prevenir envío del formulario si las contraseñas no coinciden
+            const form = document.getElementById('registerForm');
+            form.addEventListener('submit', function(e) {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    e.preventDefault();
+                    // Enfocar el campo de confirmación y mostrar mensaje
+                    confirmPasswordInput.focus();
+                    mismatchMessage.style.display = 'block';
+                    matchMessage.style.display = 'none';
+                }
+            });
+
+            // Manejar estilos de autofill
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                // Aplicar estilos al cargar si ya tiene valor
+                setTimeout(() => {
+                    if (input.value) {
+                        input.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                        input.style.color = '#fff';
+                        input.style.webkitTextFillColor = '#fff';
+                        input.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                    }
+                }, 100);
+
+                // Estilos al focus
+                input.addEventListener('focus', function() {
+                    this.style.backgroundColor = 'rgba(0,255,255,0.15)';
+                    this.style.webkitTextFillColor = '#fff';
+                    this.style.boxShadow = '0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset';
+                });
+
+                // Estilos al blur
+                input.addEventListener('blur', function() {
+                    this.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                    this.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                });
+            });
+
+            // Validación inicial
+            validatePasswords();
+        });
+    </script>
+
+    @section Scripts {
+        @await Html.PartialAsync("_ValidationScriptsPartial")
     }
-}
+</body>
+</html>
