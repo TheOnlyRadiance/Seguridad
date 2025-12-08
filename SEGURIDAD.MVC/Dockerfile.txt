@@ -1,0 +1,39 @@
+﻿# ===========================================================
+# ETAPA 1: BUILD
+# ===========================================================
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar solución y csproj
+COPY SEGURIDAD.DATA/SEGURIDAD.DATA.csproj SEGURIDAD.DATA/
+COPY SEGURIDAD.DTOS/SEGURIDAD.DTOS.csproj SEGURIDAD.DTOS/
+COPY SEGURIDAD.MVC/SEGURIDAD.MVC.csproj SEGURIDAD.MVC/
+
+COPY SEGURIDAD.MVC.sln .
+
+# Restaurar dependencias
+RUN dotnet restore
+
+# Copiar todo el código
+COPY . .
+
+# Publicar en modo Release
+WORKDIR /src/SEGURIDAD.MVC
+RUN dotnet publish -c Release -o /app/publish
+
+
+# ===========================================================
+# ETAPA 2: RUNTIME
+# ===========================================================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+# Puerto que usa Railway
+EXPOSE 8080
+
+# IMPORTANTE: permitir que Kestrel escuche en Railway
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+
+ENTRYPOINT ["dotnet", "SEGURIDAD.MVC.dll"]
