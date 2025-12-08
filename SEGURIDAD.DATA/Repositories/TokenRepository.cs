@@ -1,50 +1,44 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using SEGURIDAD.DATA.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
-
-namespace SEGURIDAD.DATA.Repositories
+public class TokenRepository : ITokenRepository
 {
-    public class TokenRepository : ITokenRepository
+    private readonly string _jwtKey;
+    private readonly string _jwtIssuer;
+    private readonly string _jwtAudience;
+    private readonly int _durationMinutes;
+
+    public TokenRepository()
     {
-        private readonly IConfiguration _config;
+        _jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? throw new Exception("JWT_KEY missing");
+        _jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER missing");
+        _jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE missing");
+        _durationMinutes = 60; // puedes hacer otra variable de entorno si quieres
+    }
 
-        public TokenRepository(IConfiguration config)
+    public string GenerateToken(string correo, int userId)
+    {
+        var keyBytes = Convert.FromBase64String(_jwtKey);
+
+        var creds = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
         {
-            _config = config;
-        }
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, correo),
+            new Claim("usuario", correo)
+        };
 
-        public string GenerateToken(string correo, int userId)
-        {
-            var key = Convert.FromBase64String(_config["Jwt:Key"]);
+        var token = new JwtSecurityToken(
+            issuer: _jwtIssuer,
+            audience: _jwtAudience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_durationMinutes),
+            signingCredentials: creds
+        );
 
-            var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-        new Claim(ClaimTypes.Email, correo),
-        new Claim("usuario", correo)
-    };
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:DurationMinutes")),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

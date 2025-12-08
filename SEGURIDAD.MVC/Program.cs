@@ -38,11 +38,7 @@ builder.Services.AddSingleton(bdConfig);
 
 // Repositorios
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
-builder.Services.AddSingleton<ITokenRepository, TokenRepository>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    return new TokenRepository(config);
-});
+builder.Services.AddSingleton<ITokenRepository, TokenRepository>();
 
 
 // -------------------------------------------------------------
