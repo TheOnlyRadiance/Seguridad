@@ -60,8 +60,8 @@ namespace SEGURIDAD.MVC.Controllers
             Response.Cookies.Append("jwt_token", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // pon true en producción
-                SameSite = SameSiteMode.Lax,
+                Secure = true, // <---- OBLIGATORIO EN PRODUCCIÓN
+                SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
 

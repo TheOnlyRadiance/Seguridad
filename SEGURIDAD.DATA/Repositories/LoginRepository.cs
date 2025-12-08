@@ -3,6 +3,7 @@ using SEGURIDAD.DATA.Modelos;
 using System;
 using Npgsql;
 using Dapper;
+using System.Text.RegularExpressions;
 
 namespace SEGURIDAD.DATA.Repositories
 {
@@ -32,10 +33,28 @@ namespace SEGURIDAD.DATA.Repositories
         }
 
         // ---------------------------------------------------
+        // MÉTODO PRIVADO: VALIDA EL CORREO
+        // ---------------------------------------------------
+        private bool ValidarCorreo(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo)) return false;
+
+            // Regex simple: debe tener @ y terminar en .com
+            var regex = new Regex(@"^[^@\s]+@[^@\s]+\.com$", RegexOptions.IgnoreCase);
+            return regex.IsMatch(correo);
+        }
+
+        // ---------------------------------------------------
         // REGISTRO (solo inserta — el hash ya debe venir desde AuthController)
         // ---------------------------------------------------
         public bool RegistrarUsuario(string correo, string contrasenaHasheada)
         {
+            // Validar correo antes de intentar registrar
+            if (!ValidarCorreo(correo))
+            {
+                throw new ArgumentException("El correo debe ser válido y terminar en .com");
+            }
+
             using var connection = new NpgsqlConnection(_config.ConnectionString);
 
             string sql = @"
@@ -48,5 +67,6 @@ namespace SEGURIDAD.DATA.Repositories
 
             return id.HasValue;
         }
+
     }
 }

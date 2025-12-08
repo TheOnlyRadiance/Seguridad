@@ -10,6 +10,16 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------------------------------------------
+//  CONFIG PORT FOR RAILWAY
+// -------------------------------------------------------------
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(int.Parse(port));
+});
+
+// -------------------------------------------------------------
 // MVC
 // -------------------------------------------------------------
 builder.Services.AddControllersWithViews();
@@ -20,7 +30,10 @@ builder.Services.AddSession();
 // -------------------------------------------------------------
 // BASE DE DATOS
 // -------------------------------------------------------------
-var bdConfig = new BdSQLConfiguration(builder.Configuration.GetConnectionString("DefaultConnection")!);
+var connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION")
+                       ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+var bdConfig = new BdSQLConfiguration(connectionString!);
 builder.Services.AddSingleton(bdConfig);
 
 // Repositorios
@@ -28,15 +41,17 @@ builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddSingleton<ITokenRepository, TokenRepository>();
 
 // -------------------------------------------------------------
-// 🔐 AES-GCM — clave Base64 desde appsettings.json
+// 🔐 AES-GCM — clave Base64 desde variable de entorno o appsettings.json
 // -------------------------------------------------------------
-var keyBase64 = builder.Configuration["Encryption:Key"];
+var keyBase64 = Environment.GetEnvironmentVariable("ENCRYPTION_KEY")
+                 ?? builder.Configuration["Encryption:Key"];
+
 if (string.IsNullOrEmpty(keyBase64))
-    throw new Exception("❌ ERROR: Falta Encryption:Key en appsettings.json");
+    throw new Exception("❌ ERROR: Falta Encryption:Key");
 
 var keyBytes = Convert.FromBase64String(keyBase64);
 
-// Registrar ICryptoService (MUY IMPORTANTE)
+// Registrar ICryptoService
 builder.Services.AddSingleton<ICryptoService>(sp =>
     new CriptoRepository(keyBytes)
 );
@@ -44,9 +59,17 @@ builder.Services.AddSingleton<ICryptoService>(sp =>
 // -------------------------------------------------------------
 // 🔥 JWT CONFIG
 // -------------------------------------------------------------
-var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+               ?? builder.Configuration["Jwt:Key"];
+
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+                ?? builder.Configuration["Jwt:Issuer"];
+
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+                  ?? builder.Configuration["Jwt:Audience"];
+
 if (string.IsNullOrEmpty(jwtKey))
-    throw new Exception("❌ ERROR: Falta Jwt:Key en appsettings.json");
+    throw new Exception("❌ ERROR: Falta Jwt:Key");
 
 var jwtKeyBytes = Convert.FromBase64String(jwtKey);
 
@@ -66,15 +89,13 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(jwtKeyBytes),
 
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidIssuer = jwtIssuer,
 
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = jwtAudience,
 
         ValidateLifetime = true,
-
-        // 🔥 evita errores raros con la fecha del token
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero // <--- obligatorio
     };
 
     // 🔥 JWT desde cookie
@@ -101,7 +122,6 @@ builder.Services.AddRateLimiter(options =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
 
-        // Mensaje de error personalizado
         await context.HttpContext.Response.WriteAsync(
             "Has superado el límite de peticiones. Por favor espera unos segundos e intenta nuevamente.");
     };
@@ -111,9 +131,9 @@ builder.Services.AddRateLimiter(options =>
             context.Connection.RemoteIpAddress?.ToString() ?? "anon",
             _ => new TokenBucketRateLimiterOptions
             {
-                TokenLimit = 20, //peticiones por usuario
-                TokensPerPeriod = 20, //Recarga cada periodo
-                ReplenishmentPeriod = TimeSpan.FromSeconds(5), //Cada 5 Segundos
+                TokenLimit = 20,
+                TokensPerPeriod = 20,
+                ReplenishmentPeriod = TimeSpan.FromSeconds(5),
                 AutoReplenishment = true,
                 QueueLimit = 0,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst
@@ -122,12 +142,10 @@ builder.Services.AddRateLimiter(options =>
     );
 });
 
-
-
 var app = builder.Build();
 
 // -------------------------------------------------------------
-// ORDEN DE MIDDLEWARES (IMPORTANTE)
+// ORDEN DE MIDDLEWARES
 // -------------------------------------------------------------
 app.UseRateLimiter();
 
@@ -141,6 +159,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
 
 // SESSION va ANTES del auth
 app.UseSession();

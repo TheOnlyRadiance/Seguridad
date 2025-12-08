@@ -1,54 +1,384 @@
-﻿﻿@{
-ViewData["Title"] = "Iniciar Sesión";
-ViewData["OcultarMenu"] = true;
+﻿@{
+    ViewData["Title"] = "Iniciar Sesión";
+    ViewData["OcultarMenu"] = true;
 }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Proyecto Final Seguridad</title>
 
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
+    <style>
+        :root {
+            --cyan: #00ffff;
+            --dark: #0f0f1e;
+            --card-bg: #1a1a2e;
+        }
 
-        <div class="col-md-10 col-lg-8">
+        /* === FORZAR CENTRADO COMPLETO === */
+        * {
+            box-sizing: border-box;
+        }
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-person-circle"></i> Iniciar Sesión</h4>
-                </div>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--dark);
+            overflow-x: hidden; /* Evitar scroll horizontal */
+        }
 
-                <div class="card-body">
-                    <form asp-controller="Auth" asp-action="Login" method="post">
+        body {
+            display: flex;
+            flex-direction: column; /* Para alinear elementos verticalmente */
+            align-items: center; /* Centra horizontalmente */
+            justify-content: center; /* Centra verticalmente */
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            padding: 20px; /* Espacio en los bordes */
+        }
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
+            /* Fondo animado */
+            body::before {
+                content: '';
+                position: fixed; /* Cambiado a fixed para cubrir toda la pantalla */
+                inset: 0;
+                background: radial-gradient(circle at 30% 70%, rgba(0,255,255,0.08), transparent 50%), radial-gradient(circle at 70% 30%, rgba(0,255,255,0.06), transparent 50%);
+                z-index: -1;
+                animation: pulse 12s infinite alternate;
+            }
+
+        @@keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* CONTENEDOR PRINCIPAL QUE GARANTIZA EL CENTRADO */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px; /* Ancho máximo */
+            margin: 0 auto; /* Centrado automático */
+            flex: 1;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 0 50px rgba(0,255,255,0.3), 0 0 100px rgba(0,255,255,0.15);
+            border: 1px solid rgba(0,255,255,0.35);
+            backdrop-filter: blur(15px);
+            z-index: 10;
+            margin: 0 auto; /* Centrado horizontal automático */
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            padding: 3.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,255,255,0.4);
+        }
+
+            .card-header i {
+                font-size: 4rem;
+                color: var(--cyan);
+                margin-bottom: 1rem;
+                text-shadow: 0 0 40px rgba(0,255,255,0.6);
+            }
+
+            .card-header h2 {
+                margin: 0;
+                font-weight: 800;
+                font-size: 2.4rem;
+                color: var(--cyan);
+                text-shadow: 0 0 25px rgba(0,255,255,0.7);
+                letter-spacing: 1px;
+            }
+
+            .card-header small {
+                color: rgba(255,255,255,0.8);
+                font-size: 1.1rem;
+                display: block;
+                margin-top: 0.5rem;
+            }
+
+        .card-body {
+            padding: 3rem 2.5rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.6rem;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1.3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cyan);
+            font-size: 1.35rem;
+            z-index: 10;
+            opacity: 0.9;
+        }
+
+        /* INPUTS - CORREGIDO PARA EVITAR FONDO BLANCO DE AUTOFILL */
+        .form-control {
+            background: rgba(255,255,255,0.07) !important;
+            border: 1px solid rgba(0,255,255,0.4);
+            color: #fff !important;
+            border-radius: 50px;
+            padding: 1rem 1.3rem 1rem 3.8rem;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            width: 100%; /* Asegurar ancho completo */
+            /* Deshabilitar estilos nativos de autocompletado */
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+            box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+        }
+
+            .form-control:focus {
+                background: rgba(0,255,255,0.15) !important;
+                border-color: var(--cyan);
+                box-shadow: 0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset !important;
+                color: #fff !important;
+                outline: none;
+                -webkit-text-fill-color: #fff !important;
+                -webkit-box-shadow: 0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset !important;
+            }
+
+            /* Estilos para cuando el navegador aplica autofill */
+            .form-control:-webkit-autofill,
+            .form-control:-webkit-autofill:hover,
+            .form-control:-webkit-autofill:focus,
+            .form-control:-webkit-autofill:active {
+                -webkit-text-fill-color: #fff !important;
+                -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.07) inset !important;
+                transition: background-color 5000s ease-in-out 0s;
+                color: #fff !important;
+                background-color: rgba(255,255,255,0.07) !important;
+            }
+
+        .btn-login {
+            background: var(--cyan);
+            color: #000;
+            font-weight: 800;
+            font-size: 1.15rem;
+            border-radius: 50px;
+            padding: 1rem;
+            border: none;
+            width: 100%;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto; /* Centrado del botón */
+        }
+
+            .btn-login:hover {
+                background: #00e6e6;
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0,255,255,0.6);
+            }
+
+        .alert-danger {
+            background: rgba(231,76,60,0.25);
+            border: 1px solid #e74c3c;
+            color: #ffb3b3;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        .text-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+            .text-link:hover {
+                color: #00cccc;
+                text-decoration: underline;
+            }
+
+        footer {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0,255,255,0.5);
+            font-size: 0.95rem;
+            z-index: 5;
+            text-align: center;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* RESPONSIVE PARA CENTRAR EN TODAS LAS PANTALLAS */
+        @@media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .login-card {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .card-header {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .card-body {
+                padding: 2rem 1.5rem;
+            }
+
+            footer {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 30px;
+                padding: 0 20px;
+            }
+        }
+
+        @@media (max-height: 700px) {
+            body {
+                justify-content: flex-start;
+                padding-top: 40px;
+            }
+
+            footer {
+                position: relative;
+                margin-top: 40px;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="login-card">
+            <div class="card-header">
+                <i class="bi bi-shield-lock-fill"></i>
+                <h2>Proyecto Final</h2>
+                <small>Seguridad Informática</small>
+            </div>
+
+            <div class="card-body">
+                <form asp-controller="Auth" asp-action="Login" method="post" autocomplete="on">
+                    <div class="input-group">
+                        <i class="bi bi-envelope-fill input-icon"></i>
+                        <input type="email" class="form-control" name="email" placeholder="Correo Electrónico" required autocomplete="email" />
+                    </div>
+
+                    <div class="input-group">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input type="password" class="form-control" name="password" placeholder="Contraseña" required autocomplete="current-password" />
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger mb-3">
+                            @ViewBag.Error
                         </div>
+                    }
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="******" required>
-                        </div>
+                    <button type="submit" class="btn btn-login">
+                        Iniciar Sesión
+                    </button>
+                </form>
 
-                        @if (ViewBag.Error != null)
-                        {
-                            <div class="alert alert-danger">
-                                @ViewBag.Error
-                            </div>
-                        }
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
-                        </div>
-
-                    </form>
-                </div>
-
-                <!-- 🚀 BOTÓN DE IR A REGISTRO -->
-                <div class="text-center">
-                    <a href="/Auth/Register" class="btn btn-link">
-                         Crear una cuenta nueva
+                <div class="text-center mt-4">
+                    <a href="/Auth/Register" class="text-link">
+                        Crear una cuenta nueva
                     </a>
                 </div>
             </div>
-
         </div>
     </div>
-</div>
+
+    <footer>© 2025 Proyecto Final - Seguridad Informática</footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Script para prevenir el fondo blanco del autofill
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-control');
+
+            // Forzar estilos para inputs con autofill
+            inputs.forEach(input => {
+                // Detectar cambios en el input (incluyendo autofill)
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            // Si el navegador cambia el estilo (autofill), lo corregimos
+                            input.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                            input.style.color = '#fff';
+                            input.style.webkitTextFillColor = '#fff';
+                            input.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                        }
+                    });
+                });
+
+                observer.observe(input, { attributes: true });
+
+                // También aplicar estilos al cargar si ya tiene valor (autofill previo)
+                setTimeout(() => {
+                    if (input.value) {
+                        input.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                        input.style.color = '#fff';
+                        input.style.webkitTextFillColor = '#fff';
+                        input.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                    }
+                }, 100);
+
+                // Aplicar estilos al hacer focus
+                input.addEventListener('focus', function() {
+                    this.style.backgroundColor = 'rgba(0,255,255,0.15)';
+                    this.style.webkitTextFillColor = '#fff';
+                    this.style.boxShadow = '0 0 25px rgba(0,255,255,0.5), 0 0 0px 1000px rgba(0,255,255,0.15) inset';
+                });
+
+                // Restaurar estilos al perder focus
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                        this.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                    } else {
+                        this.style.backgroundColor = 'rgba(255,255,255,0.07)';
+                        this.style.boxShadow = '0 0 0px 1000px rgba(255,255,255,0.07) inset';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
